@@ -9,6 +9,7 @@ import sys
 from distutils.version import LooseVersion
 
 from setuptools import Extension, find_packages, setup
+from setuptools._distutils.dist import Distribution
 from setuptools.command.build_ext import build_ext
 
 use_clang = False
@@ -50,13 +51,25 @@ class CMakeBuild(build_ext):
             if cmake_version < "3.1.0":
                 raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
+        extdirs = set()
         for ext in self.extensions:
             self.build_extension(ext)
-
+            extdirs.add(os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name))))
+        extdirs = list(extdirs)
+        
         if platform.system() == "Windows":
+
             mesh_renderer_dir = os.path.join(here, "igibson", "render", "mesh_renderer")
             release_dir = os.path.join(mesh_renderer_dir, "Release")
-            os.makedirs(release_dir, exist_ok=True)
+            if not os.path.exists(release_dir):
+                os.makedirs(release_dir)
+            for extdir in extdirs:
+                old_release_dir = os.path.join(extdir, "igibson", "render", "mesh_renderer", "Release")
+                if os.path.exists(old_release_dir):
+                    for f in os.listdir(old_release_dir):
+                        if f not in os.listdir(release_dir):
+                            shutil.copy(os.path.join(old_release_dir, f), release_dir)
+
             for f in os.listdir(release_dir):
                 shutil.copy(os.path.join(release_dir, f), mesh_renderer_dir)
 
@@ -71,6 +84,7 @@ class CMakeBuild(build_ext):
 
     def build_extension(self, ext):
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + os.path.join(extdir, "igibson", "render", "mesh_renderer"),
             "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY=" + os.path.join(extdir, "igibson", "render", "mesh_renderer", "build"),
@@ -107,6 +121,9 @@ class CMakeBuild(build_ext):
         subprocess.check_call(["cmake", ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
         subprocess.check_call(["cmake", "--build", "."] + build_args, cwd=self.build_temp)
 
+        
+
+
 
 '''
 class PostInstallCommand(install):
@@ -136,6 +153,6 @@ setup(
     ext_modules=[CMakeExtension("MeshRendererContext", sourcedir="igibson/render")],
     cmdclass=dict(build_ext=CMakeBuild),
     tests_require=[],
-    package_data={"": ["igibson/global_config.yaml", "igibson/render/mesh_renderer/shaders/*"]},
+    package_data={"": ["igibson/global_config.yaml", "igibson/render/mesh_renderer/shaders/*","igibson/render/mesh_renderer/*.pyd"]},
     include_package_data=True,
 )  # yapf: disable
