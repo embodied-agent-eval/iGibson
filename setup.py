@@ -56,6 +56,7 @@ class CMakeBuild(build_ext):
         if platform.system() == "Windows":
             mesh_renderer_dir = os.path.join(here, "igibson", "render", "mesh_renderer")
             release_dir = os.path.join(mesh_renderer_dir, "Release")
+            os.makedirs(release_dir, exist_ok=True)
             for f in os.listdir(release_dir):
                 shutil.copy(os.path.join(release_dir, f), mesh_renderer_dir)
 
