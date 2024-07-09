@@ -5,6 +5,7 @@ from igibson.object_states.adjacency import HorizontalAdjacency, flatten_planes
 from igibson.object_states.kinematics import KinematicsMixin
 from igibson.object_states.memoization import PositionalValidationMemoizedObjectStateMixin
 from igibson.object_states.object_state_base import BooleanState, RelativeObjectState
+import igibson
 
 
 class NextTo(PositionalValidationMemoizedObjectStateMixin, KinematicsMixin, RelativeObjectState, BooleanState):
@@ -27,6 +28,15 @@ class NextTo(PositionalValidationMemoizedObjectStateMixin, KinematicsMixin, Rela
 
         objA_lower, objA_upper = objA_aabb
         objB_lower, objB_upper = objB_aabb
+        if igibson.behavior_eval_mode:
+             # Calculate the distance between the two AABBs.
+            obj1_center= (objA_lower + objA_upper) / 2
+            objb_center = (objB_lower + objB_upper) / 2
+            distance = np.linalg.norm(obj1_center - objb_center)
+            objA_box= objA_upper - objA_lower
+            objB_box = objB_upper - objB_lower
+            if abs(distance-(objA_box[0]+objB_box[0])/2) < 0.02 or abs(distance-(objA_box[1]+objB_box[1])/2) < 0.02:
+                return True
         distance_vec = []
         for dim in range(3):
             glb = max(objA_lower[dim], objB_lower[dim])

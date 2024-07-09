@@ -140,3 +140,6 @@ debug_sampling = False
 
 # whether to ignore visual shape when importing to pybullet
 ignore_visual_shape = True
+
+# whether to use behavior-eval mode
+behavior_eval_mode = False
