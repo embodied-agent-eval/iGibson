@@ -33,7 +33,7 @@ dependencies = [
     "six",
     "pandas",
     "packaging",
-    "bddl~=1.0.1",
+    "bddl-eval~=1.0.0",
     "urllib3>=1.20",
     "progressbar>=2.5",
     "packaging",
