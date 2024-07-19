@@ -440,6 +440,7 @@ if __name__ == "__main__":
 
     if args.download_assets:
         download_assets()
+        git_lfs_pull(igibson.assets_path)
     elif args.download_demo_data:
         download_demo_data()
     elif args.download_ig_key:
@@ -448,6 +449,7 @@ if __name__ == "__main__":
         download_dataset(args.download_dataset)
     elif args.download_ig_dataset:
         download_ig_dataset()
+        git_lfs_pull(igibson.ig_dataset_path)
     elif args.change_data_path:
         change_data_path()
     elif args.download_ext_scene_assets:
