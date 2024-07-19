@@ -294,7 +294,32 @@ def download_assets():
         urlretrieve(assets_url, tmp_file, show_progress)
         log.info("Decompressing assets into {}".format(igibson.assets_path))
         os.system("tar -zxf {} --directory {}".format(tmp_file, os.path.dirname(igibson.assets_path)))
+        
+def git_lfs_pull(repo_path):
+    """
+    Perform git lfs pull in the specified repository path
+    """
+    if os.path.exists(repo_path):
+        log.info(f"Running 'git lfs pull' in {repo_path}")
+        subprocess.run(["git", "lfs", "pull"], cwd=repo_path)
+    else:
+        log.warning(f"Repository path {repo_path} does not exist")
 
+def download_igibson_key():
+    """
+    Download iGibson key
+    """
+    key_path = igibson.key_path  # Path to the iGibson key
+    url = "https://storage.googleapis.com/gibson_scenes/igibson.key"
+
+    # Ensure the parent directory of key_path exists
+    if not os.path.exists(os.path.dirname(key_path)):
+        os.makedirs(os.path.dirname(key_path))
+
+    # Download the file
+    print("Downloading iGibson key from {}".format(url))
+    urlretrieve(url, key_path,show_progress)
+    print("iGibson key downloaded to {}".format(key_path))
 
 def download_demo_data():
     """
@@ -405,6 +430,7 @@ if __name__ == "__main__":
     parser.add_argument("--download_demo_data", action="store_true", help="download demo data Rs")
     parser.add_argument("--download_dataset", type=str, help="download dataset file given an URL")
     parser.add_argument("--download_ig_dataset", action="store_true", help="download iG Dataset")
+    parser.add_argument("--download_ig_key", action="store_true", help="download iG key")
     parser.add_argument(
         "--download_ext_scene_assets", action="store_true", help="download external scene dataset assets"
     )
@@ -416,6 +442,8 @@ if __name__ == "__main__":
         download_assets()
     elif args.download_demo_data:
         download_demo_data()
+    elif args.download_ig_key:
+        download_igibson_key()
     elif args.download_dataset is not None:
         download_dataset(args.download_dataset)
     elif args.download_ig_dataset:
